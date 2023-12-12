@@ -1,27 +1,37 @@
 import json
 KLINES_COLS_NORMALIZED_COLS = {
-    "t": {"name": "start_time", "type": "long"},
-    "T": {"name": "close_time", "type": "long"},
+    "t": {"name": "open_time", "type": "long"},
+    "T": {"name": "end_time", "type": "long"},
     "s": {"name": "symbol", "type": "string"},
     "i": {"name": "interval", "type": "string"},
     "f": {"name": "first_trade_id", "type": "long"},
     "L": {"name": "last_trade_id", "type": "long"},
-    "o": {"name": "open_price", "type": "double"},
-    "c": {"name": "close_price", "type": "double"},
-    "h": {"name": "high_price", "type": "double"},
-    "l": {"name": "low_price", "type": "double"},
-    "v": {"name": "base_asset_vol", "type": "double"},
+    "o": {"name": "open", "type": "double"},
+    "c": {"name": "close", "type": "double"},
+    "h": {"name": "high", "type": "double"},
+    "l": {"name": "low", "type": "double"},
+    "v": {"name": "volume", "type": "double"},
     "n": {"name": "number_of_trade", "type": "long"},
     "x": {"name": "is_closed", "type": "boolean"},
-    "q": {"name": "quote_asset_vol", "type": "double"},
-    "V": {"name": "buy_base_asset_vol", "type": "double"},
-    "Q": {"name": "buy_quote_asset_vol", "type": "double"}
+    "q": {"name": "completed_trade_amount", "type": "double"},
+    "V": {"name": "taker_completed_trade_volume", "type": "double"},
+    "Q": {"name": "taker_trade_amount", "type": "double"}
 }
 
 
 def normalize_data(payload):
     data = json.loads(payload)
+    return data
     res = {}
     for column, attrs in KLINES_COLS_NORMALIZED_COLS.items():
-        res.update({attrs["name"]: data[column]})
+        value = data[column]
+        if attrs["type"] == "long":
+            value = int(value)
+        elif attrs["type"] == "double":
+            value = float(value)
+        elif attrs["type"] == "boolean":
+            value = bool(value)
+        elif attrs["type"] == "string":
+            value = str(value)
+        res.update({attrs["name"]: value})
     return res

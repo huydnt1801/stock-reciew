@@ -3,7 +3,7 @@ import logging.handlers
 
 
 def get_logger(name: str, path: str) -> logging.Logger:
-    fmt = '- %(message)s'  # %(asctime)s %(levelname)s:
+    fmt = '%(message)s'  # %(asctime)s %(levelname)s: %(message)s
     formatter = logging.Formatter(fmt=fmt)
     handler = logging.handlers.RotatingFileHandler(
         filename=path,

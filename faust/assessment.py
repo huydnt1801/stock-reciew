@@ -1,26 +1,22 @@
 from config import Config
 from utils.helper import *
 from utils.logger import get_logger
-from gpt import generate_new
 import pandas as pd
 import math
 import pymongo
 
 
 class Assessment():
-    def __init__(self):
+    def __init__(self, symbol, data):
         self.logger = get_logger("Assessment", Config.LOG_FILE)
         client = pymongo.MongoClient(Config.DB_URL)
         self.database = client["crypto_assessment"]
         self.init_score = 1
-
-    def input_data(self):
-        collection = self.database[self.symbol + "_" + self.interval]
-        cursor = collection.find({}, {'_id': False}).limit(30)
-        self.logger.info(list(cursor))
-        df = pd.DataFrame(list(cursor))
-        del df['_id']
-        return df
+        self.interval = "1m"
+        self.type = "giờ"
+        self.symbol = symbol
+        self.data = pd.json_normalize(data)
+        self.res = {}
 
     def price_indexes_change(self, data, thresh_hold):
         increase_indexes = []
@@ -95,28 +91,29 @@ class Assessment():
     def _price(self, idx_max_price, idx_min_price):
         max = self.data.iloc[idx_max_price].loc
         min = self.data.iloc[idx_min_price].loc
-        score = max["high"]/min["low"] * 0.9
         msg = f"""Trong {self.type} qua, giá {self.symbol} cao nhất là: {max["high"]} lúc {convert_to_date(max["open_time"])} và thấp nhất là: {min["low"]} lúc {convert_to_date(min["open_time"])}"""
-        # msg =f"""Điểm: {score}""")
+        self.res.update({"price": {"max": max["high"],
+                                   "min": min["low"],
+                                   "max_time": max["open_time"],
+                                   "min_time": min["open_time"]}})
         return msg
 
     def _daily_price(self, start_price, end_price):
-        score = 0
         if end_price > start_price:
-            score = end_price/start_price
+            type = 1
             percent = (end_price/start_price - 1) * 100
             if percent >= 0.01:
                 msg = f"""Trong {self.type} qua, giá {self.symbol} tăng {convert_percent(percent)}%"""
             else:
                 msg = f"""Trong {self.type} qua, giá {self.symbol} tăng {percent}%"""
         elif end_price < start_price:
-            score = start_price/end_price
+            type = -1
             percent = 1 - end_price/start_price
             if percent >= 0.01:
                 msg = f"""Trong {self.type} qua, giá {self.symbol} giảm {convert_percent(percent)}%"""
             else:
                 msg = f"""Trong {self.type} qua, giá {self.symbol} giảm {percent}%"""
-        # msg =f"""Điểm: {score}""")
+        self.res.update({"daily_price": {"type": type, "percent": percent}})
         return msg
 
     def _change_number(self, cnt_change):
@@ -129,10 +126,10 @@ class Assessment():
         else:
             msg = f"""Giá {self.symbol} trong {self.type} qua không có quá nhiều thay đổi"""
             change_type = 0.5
-        # msg =f"""Điểm: {self.init_score * change_type}""")
+        self.res.update({"change_number": cnt_change})
         return msg
 
-    def _volume_analysis(self, high, low, change_type=1):
+    def _volume_analysis(self, high, low):
         max_volume_high = min_volume_high = high[0]
         for val in high:
             if val['volume_arg'] > max_volume_high['volume_arg']:
@@ -150,21 +147,17 @@ class Assessment():
         max_volume_high_end = self.data.iloc[max_volume_high['end_idx']].loc
         max_volume_high_percent = (
             max_volume_high_end["high"] / max_volume_high_start["low"] - 1) * 100
-        score = math.log(max_volume_high['volume_arg'] / min_volume_high['volume_arg']) * \
-            max_volume_high_end["high"] / \
-            max_volume_high_start["low"] * self.init_score * change_type
         msg = f"""Từ {convert_to_date(max_volume_high_start["open_time"])} đến {convert_to_date(max_volume_high_end["open_time"])} {self.symbol} tăng {convert_percent(max_volume_high_percent)}% với volume trung bình cao nhất {max_volume_high['volume_arg']}/phút"""
-        # msg =f"""Điểm: {score}""")
+        self.res.update({"volume_increase": {"start_time": max_volume_high_start["open_time"], "end_time": max_volume_high_end[
+                        "open_time"], "percent": max_volume_high_percent, "value": max_volume_high['volume_arg']}})
 
         max_volume_low_start = self.data.iloc[max_volume_low['start_idx']].loc
         max_volume_low_end = self.data.iloc[max_volume_low['end_idx']].loc
         max_volume_low_percent = (
             1 - max_volume_low_end["low"] / max_volume_low_start["high"]) * 100
-        score = math.log(max_volume_low['volume_arg'] / min_volume_low['volume_arg']) * \
-            max_volume_low_end["low"] / max_volume_low_start["high"] * \
-            self.init_score * change_type
         msg += f"""\nTừ {convert_to_date(max_volume_low_start["open_time"])} đến {convert_to_date(max_volume_low_end["open_time"])} {self.symbol} giảm {convert_percent(max_volume_low_percent)}% với volume trung bình cao nhất {max_volume_low['volume_arg']}/phút"""
-        # msg =f"""Điểm: {score}""")
+        self.res.update({"volume_reduce": {"start_time": max_volume_low_start["open_time"], "end_time": max_volume_low_end[
+            "open_time"], "percent": max_volume_low_percent, "value": max_volume_low['volume_arg']}})
         return msg
 
     def analysis(self):
@@ -182,24 +175,15 @@ class Assessment():
         msg += "\n" + self._volume_analysis(high, low)
         return msg
 
-    def start(self):
+    async def start(self):
         self.logger.info("Start Assessment")
         try:
             msg = ""
-            for symbol in Config.SYMBOLS:
-                for type in Config.TYPE:
-                    self.interval = "1m"
-                    self.type = type
-                    self.symbol = symbol
-                    self.data = self.input_data()
-                    msg += self.analysis()
-            # self.logger.info(msg)
-            # new = generate_new(msg)
-            # self.logger.info(new)
+            msg += self.analysis()
+            await self.logger.info(msg)
             self.stop()
         except Exception as e:
             self.logger.error(f"{e}")
-            print(e)
             self.stop()
 
     def stop(self) -> None:

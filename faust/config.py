@@ -2,11 +2,10 @@ import os
 
 
 class Config:
+    LOG_FILE = f'{os.path.dirname(os.path.realpath(__file__))}/logs/assessment.log'
     FAUST_NAME = "data_loader"
-    TICKER_INFO_KAFKA_TOPIC = "ticker.24h-info"
     KLINES_KAFKA_TOPIC = "klines"
-
-    KLINES_INTERVAL = ["1m", "1h", "1d", "1w", "1M"]
+    THRESH_HOLD = 1.000001
 
     KAFKA_CONFIG = {
         "bootstrap.servers": "localhost:9092",
