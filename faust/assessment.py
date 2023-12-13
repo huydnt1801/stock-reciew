@@ -7,10 +7,9 @@ import pymongo
 
 
 class Assessment():
-    def __init__(self, symbol, data):
+    def __init__(self, collection, symbol, data):
         self.logger = get_logger("Assessment", Config.LOG_FILE)
-        client = pymongo.MongoClient(Config.DB_URL)
-        self.database = client["crypto_assessment"]
+        self.collection = collection
         self.init_score = 1
         self.interval = "1m"
         self.type = "giờ"
@@ -92,10 +91,10 @@ class Assessment():
         max = self.data.iloc[idx_max_price].loc
         min = self.data.iloc[idx_min_price].loc
         msg = f"""Trong {self.type} qua, giá {self.symbol} cao nhất là: {max["high"]} lúc {convert_to_date(max["open_time"])} và thấp nhất là: {min["low"]} lúc {convert_to_date(min["open_time"])}"""
-        self.res.update({"price": {"max": max["high"],
-                                   "min": min["low"],
-                                   "max_time": max["open_time"],
-                                   "min_time": min["open_time"]}})
+        self.res.update({"price": {"max": float(max["high"]),
+                                   "min": float(min["low"]),
+                                   "max_time": int(max["open_time"]),
+                                   "min_time": int(min["open_time"])}})
         return msg
 
     def _daily_price(self, start_price, end_price):
@@ -113,7 +112,8 @@ class Assessment():
                 msg = f"""Trong {self.type} qua, giá {self.symbol} giảm {convert_percent(percent)}%"""
             else:
                 msg = f"""Trong {self.type} qua, giá {self.symbol} giảm {percent}%"""
-        self.res.update({"daily_price": {"type": type, "percent": percent}})
+        self.res.update(
+            {"daily_price": {"type": type, "percent": float(percent)}})
         return msg
 
     def _change_number(self, cnt_change):
@@ -126,7 +126,7 @@ class Assessment():
         else:
             msg = f"""Giá {self.symbol} trong {self.type} qua không có quá nhiều thay đổi"""
             change_type = 0.5
-        self.res.update({"change_number": cnt_change})
+        self.res.update({"change_number": int(cnt_change)})
         return msg
 
     def _volume_analysis(self, high, low):
@@ -148,16 +148,16 @@ class Assessment():
         max_volume_high_percent = (
             max_volume_high_end["high"] / max_volume_high_start["low"] - 1) * 100
         msg = f"""Từ {convert_to_date(max_volume_high_start["open_time"])} đến {convert_to_date(max_volume_high_end["open_time"])} {self.symbol} tăng {convert_percent(max_volume_high_percent)}% với volume trung bình cao nhất {max_volume_high['volume_arg']}/phút"""
-        self.res.update({"volume_increase": {"start_time": max_volume_high_start["open_time"], "end_time": max_volume_high_end[
-                        "open_time"], "percent": max_volume_high_percent, "value": max_volume_high['volume_arg']}})
+        self.res.update({"volume_increase": {"start_time": int(max_volume_high_start["open_time"]), "end_time": int(max_volume_high_end[
+                        "open_time"]), "percent": float(max_volume_high_percent), "value": float(max_volume_high['volume_arg'])}})
 
         max_volume_low_start = self.data.iloc[max_volume_low['start_idx']].loc
         max_volume_low_end = self.data.iloc[max_volume_low['end_idx']].loc
         max_volume_low_percent = (
             1 - max_volume_low_end["low"] / max_volume_low_start["high"]) * 100
         msg += f"""\nTừ {convert_to_date(max_volume_low_start["open_time"])} đến {convert_to_date(max_volume_low_end["open_time"])} {self.symbol} giảm {convert_percent(max_volume_low_percent)}% với volume trung bình cao nhất {max_volume_low['volume_arg']}/phút"""
-        self.res.update({"volume_reduce": {"start_time": max_volume_low_start["open_time"], "end_time": max_volume_low_end[
-            "open_time"], "percent": max_volume_low_percent, "value": max_volume_low['volume_arg']}})
+        self.res.update({"volume_reduce": {"start_time": int(max_volume_low_start["open_time"]), "end_time": int(max_volume_low_end[
+            "open_time"]), "percent": float(max_volume_low_percent), "value": float(max_volume_low['volume_arg'])}})
         return msg
 
     def analysis(self):
@@ -180,7 +180,8 @@ class Assessment():
         try:
             msg = ""
             msg += self.analysis()
-            await self.logger.info(msg)
+            # await self.logger.info(msg)
+            self.collection.insert_one(self.res)
             self.stop()
         except Exception as e:
             self.logger.error(f"{e}")

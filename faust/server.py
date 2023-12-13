@@ -27,7 +27,8 @@ async def greet(payloads):
             metadata[data["symbol"]] = [data]
         print(len(metadata[data["symbol"]]))
         if len(metadata[data["symbol"]]) > 10:
-            assessment = Assessment(data["symbol"], metadata[data["symbol"]])
+            assessment = Assessment(
+                db[data["symbol"]], data["symbol"], metadata[data["symbol"]])
             metadata[data["symbol"]] = []
             await assessment.start()
 
