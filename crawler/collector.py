@@ -9,10 +9,10 @@ from kafka import KafkaProducer
 
 class DataCollector():
     def __init__(self) -> None:
-        # self.binance_client = BinanceWebSocketApiManager(
-        #     lucit_api_secret=BINANCE_API_SECRET,
-        #     lucit_license_token=BINANCE_LICENSE_TOKEN
-        # )
+        self.binance_client = BinanceWebSocketApiManager(
+            lucit_api_secret=BINANCE_API_SECRET,
+            lucit_license_token=BINANCE_LICENSE_TOKEN
+        )
 
         def serializer(message):
             return json.dumps(message).encode('utf-8')
@@ -62,8 +62,8 @@ class DataCollector():
     def start(self) -> None:
         self.logger.info("Start collect data")
         try:
-            # asyncio.run(self.collect_data())
-            self.test()
+            asyncio.run(self.collect_data())
+            # self.test()
         except Exception as e:
             self.logger.error(f"{e}")
             self.stop()

@@ -1,7 +1,7 @@
 import os
 
-BINANCE_LICENSE_TOKEN = 'f639bb70-977e-41a5-a420-t7f52c1fe9f42'
-BINANCE_API_SECRET = '339495bcd9a13b3434d847a9863fa155720cd914711d7fc53ce326f6adca799e'
+BINANCE_LICENSE_TOKEN = '00508345-8bd5-4c58-88db-t7813ac54794a'
+BINANCE_API_SECRET = '45409974daefb4f9f62d08f1a06b56cdaf23bbea691a367a3bfa0ffe7234a184'
 
 
 class Config:
@@ -16,7 +16,7 @@ class Config:
         "shibusdt", "trxbtc", "solusdt"
     ]
 
-    SUBCRIBE_CHANNELS = ['kline_1m']
+    SUBCRIBE_CHANNELS = ['kline_1m'] #1M
 
     TICKER_INFO_EVENT_TYPE = "24hrTicker"
     KLINES_EVENT_TYPE = "kline"

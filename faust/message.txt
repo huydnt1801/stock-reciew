@@ -1,0 +1,26 @@
+Bản tin về tình hình tiền ảo:
+Trong giờ qua, giá các loại tiền ảo đã có những biến động đáng chú ý trên thị trường. Giá BTCUSDT đã tăng 0.2% trong khoảng thời gian này. Giá cao nhất của BTCUSDT đạt mức 43020.01 vào lúc 17:55:00 ngày 14/12/2023 và giá thấp nhất là 42784.13 vào lúc 17:22:00 cùng ngày.
+
+Đối với LUNAUSDT, giá cao nhất trong giờ qua là 0.9972 vào lúc 17:59:00 và giá thấp nhất là 0.9892 vào lúc 17:39:00.
+
+Giá ETHUSDT cũng có sự biến động trong giờ qua, với giá cao nhất là 2290.77 vào lúc 17:55:00 và giá thấp nhất là 2276.0 vào lúc 17:20:00. Trong khoảng thời gian từ 17:55:00 đến 18:00:00, giá ETHUSDT đã giảm 0.22% với volume trung bình cao nhất đạt 785.6041/phút.
+
+BNBUSDT cũng không nằm ngoài xu hướng biến động của thị trường. Giá cao nhất của BNBUSDT trong giờ qua là 252.8 vào lúc 17:09:00 và giá thấp nhất là 251.7 vào lúc 18:08:00. Trong khoảng thời gian từ 17:27:00 đến 17:28:00, giá BNBUSDT đã tăng 0.12% với volume trung bình cao nhất đạt 780.86/phút. Tuy nhiên, từ 17:26:00 đến 17:28:00, giá BNBUSDT đã giảm 0.12% với volume trung bình cao nhất đạt 1285.802/phút.
+
+XRPUSDT cũng có sự biến động trong giờ qua, với giá cao nhất là 0.6326 vào lúc 17:55:00 và giá thấp nhất là 0.629 vào lúc 17:20:00.
+
+DOGEUSDT cũng không nằm ngoài xu hướng biến động của thị trường. Giá cao nhất của DOGEUSDT trong giờ qua là 0.09758 vào lúc 17:54:00 và giá thấp nhất là 0.09663 vào lúc 17:12:00. Trong khoảng thời gian từ 17:33:00 đến 17:36:00, giá DOGEUSDT đã tăng 0.29% với volume trung bình cao nhất đạt 1804844.3333333333/phút.
+
+ETHBTC cũng có sự biến động trong giờ qua, với giá cao nhất là 0.05331 vào lúc 17:29:00 và giá thấp nhất là 0.05317 vào lúc 17:19:00. Trong khoảng thời gian từ 17:32:00 đến 17:41:00, giá ETHBTC đã tăng 0.13% với volume trung bình cao nhất đạt 32.42408888888889/phút. Tuy nhiên, từ 17:09:00 đến 17:14:00, giá ETHBTC đã giảm 0.08% với volume trung bình cao nhất đạt 56.4862/phút.
+
+BNBBTC cũng không nằm ngoài xu hướng biến động của thị trường. Giá cao nhất của BNBBTC trong giờ qua là 0.005902 vào lúc 17:16:00 và giá thấp nhất là 0.005865 vào lúc 18:08:00. Trong khoảng thời gian từ 17:32:00 đến 17:35:00, giá BNBBTC đã tăng 0.1% với volume trung bình cao nhất đạt 300.02166666666665/phút.
+
+SOLBTC có sự biến động mạnh trong giờ qua, không có giá cao nhất và thấp nhất cụ thể được ghi nhận. Tuy nhiên, từ 17:09:00 đến 17:13:00, giá SOLBTC đã giảm 0.22% với volume trung bình cao nhất đạt 877.14/phút.
+
+Giá SHIBUSDT cũng có sự biến động trong giờ qua, với giá cao nhất là 0.00001012 vào lúc 17:09:00 và giá thấp nhất là 0.0001003 vào lúc 17:16:00.
+
+TRXBTC cũng có sự biến động trong giờ qua, với giá tăng 0.41% trong thời gian này. Giá cao nhất của TRXBTC là 0.00000245 vào lúc 17:04:00 và giá thấp nhất là 0.00000243 vào lúc 17:13:00.
+
+SOLUSDT cũng có sự biến động mạnh trong giờ qua, không có giá cao nhất và thấp nhất cụ thể được ghi nhận. Tuy nhiên, từ 17:09:00 đến 17:13:00, giá SOLUSDT đã giảm 0.32% với volume trung bình cao nhất đạt 9933.15/phút.
+
+Tổng quan, thị trường tiền ảo trong giờ qua đã có nhiều biến động đáng chú ý. Các loại tiền ảo như BTCUSDT, LUNAUSDT, ETHUSDT, BNBUSDT, XRPUSDT, DOGEUSDT, ETHBTC, BNBBTC, SOLBTC, SHIBUSDT, TRXBTC và SOLUSDT đều có sự biến động về giá cả và khối lượng giao dịch. Các nhà đầu tư cần theo dõi kỹ các biến động này để đưa ra quyết định đầu tư phù hợp.

@@ -25,13 +25,11 @@ async def greet(payloads):
             metadata[data["symbol"]].append(data)
         else:
             metadata[data["symbol"]] = [data]
-        print(len(metadata[data["symbol"]]))
-        if len(metadata[data["symbol"]]) > 10:
+        if len(metadata[data["symbol"]]) > 59:
             assessment = Assessment(
                 db[data["symbol"]], data["symbol"], metadata[data["symbol"]])
             metadata[data["symbol"]] = []
             await assessment.start()
 
 if __name__ == '__main__':
-    print(client.list_database_names())
     app.main()

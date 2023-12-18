@@ -21,7 +21,6 @@ KLINES_COLS_NORMALIZED_COLS = {
 
 def normalize_data(payload):
     data = json.loads(payload)
-    return data
     res = {}
     for column, attrs in KLINES_COLS_NORMALIZED_COLS.items():
         value = data[column]
