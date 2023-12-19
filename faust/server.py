@@ -11,13 +11,14 @@ app = faust.App(
     topic_partitions=1,
     consumer_reconnect_max_retries=10,
 )
-topic = app.topic("klines")
+min_topic = app.topic("klinemin")
+mon_topic = app.topic("klinemon")
 client = pymongo.MongoClient(Config.DB_URL)
 db = client["crypto_assessment"]
 metadata = {}
 
 
-@app.agent(topic)
+@app.agent(min_topic)
 async def greet(payloads):
     async for payload in payloads:
         data = normalize_data(payload)
@@ -25,11 +26,16 @@ async def greet(payloads):
             metadata[data["symbol"]].append(data)
         else:
             metadata[data["symbol"]] = [data]
-        if len(metadata[data["symbol"]]) > 59:
-            assessment = Assessment(
-                db[data["symbol"]], data["symbol"], metadata[data["symbol"]])
-            metadata[data["symbol"]] = []
-            await assessment.start()
+
+
+@app.agent(mon_topic)
+async def greet(payloads):
+    async for payload in payloads:
+        data = normalize_data(payload)
+        assessment = Assessment(
+            db[data["symbol"]], data["symbol"], metadata[data["symbol"]])
+        metadata[data["symbol"]] = []
+        await assessment.start()
 
 if __name__ == '__main__':
     app.main()

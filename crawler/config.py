@@ -16,11 +16,7 @@ class Config:
         "shibusdt", "trxbtc", "solusdt"
     ]
 
-    SUBCRIBE_CHANNELS = ['kline_1m'] #1M
+    SUBCRIBE_CHANNELS = ['kline_1m', 'kline_1M']
 
-    TICKER_INFO_EVENT_TYPE = "24hrTicker"
-    KLINES_EVENT_TYPE = "kline"
-    TICKER_INFO_KAFKA_TOPIC = "ticker.24h-info"
-    KLINES_KAFKA_TOPIC = "klines"
-
-    BINANCE_INFO_URL = "https://www.binance.com/bapi/composite/v1/public/marketing/symbol/list?nocache"
+    KLINE_MINUTES_TOPIC = "klinemin"
+    KLINE_MONTH_TOPIC = "klinemon"

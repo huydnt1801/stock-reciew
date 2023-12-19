@@ -13,6 +13,7 @@ class DataCollector():
             lucit_api_secret=BINANCE_API_SECRET,
             lucit_license_token=BINANCE_LICENSE_TOKEN
         )
+        self.flag = {}
 
         def serializer(message):
             return json.dumps(message).encode('utf-8')
@@ -26,11 +27,18 @@ class DataCollector():
         if "result" in json_result and not json_result["result"]:
             return
 
-        json_result = json_result["data"]
-        if json_result["e"] == Config.KLINES_EVENT_TYPE:
-            if json_result["k"]["x"]:
-                self.producer.send(
-                    Config.KLINES_KAFKA_TOPIC, json_result["k"]).add_callback(self.on_send_success).add_errback(self.on_send_error)
+        json_result = json_result["data"]["k"]
+        symbol = json_result["s"]
+        if json_result["i"] == "1M" and self.flag.get(symbol, False):
+            self.producer.send(
+                Config.KLINE_MONTH_TOPIC, json_result).add_callback(self.on_send_success).add_errback(self.on_send_error)
+            self.flag[symbol] = False
+        elif json_result["x"]:
+            self.producer.send(
+                Config.KLINE_MINUTES_TOPIC, json_result).add_callback(self.on_send_success).add_errback(self.on_send_error)
+            # if this result is end of hour, set flag to send month price info
+            if (json_result["T"] + 1) % 3600 == 0: 
+                self.flag[symbol] = True
 
     async def collect_data(self) -> None:
         self.binance_client.create_stream(
