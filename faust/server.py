@@ -12,6 +12,7 @@ app = faust.App(
     consumer_reconnect_max_retries=10,
 )
 min_topic = app.topic("klinemin")
+hour_topic = app.topic("klinehour")
 mon_topic = app.topic("klinemon")
 client = pymongo.MongoClient(Config.DB_URL)
 db = client["crypto_assessment"]
@@ -26,6 +27,18 @@ async def greet(payloads):
             metadata[data["symbol"]].append(data)
         else:
             metadata[data["symbol"]] = [data]
+
+# save data for indicator
+
+
+@app.agent(hour_topic)
+async def greet(payloads):
+    async for payload in payloads:
+        data = normalize_data(payload)
+        assessment = Assessment(
+            db[data["symbol"]], data["symbol"], metadata[data["symbol"]])
+        metadata[data["symbol"]] = []
+        await assessment.start()
 
 
 @app.agent(mon_topic)

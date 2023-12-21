@@ -16,7 +16,8 @@ class Config:
         "shibusdt", "trxbtc", "solusdt"
     ]
 
-    SUBCRIBE_CHANNELS = ['kline_1m', 'kline_1M']
+    SUBCRIBE_CHANNELS = ['kline_1m', 'kline_1h', 'kline_1M']
 
     KLINE_MINUTES_TOPIC = "klinemin"
+    KLINE_HOUR_TOPIC = "klinehour"
     KLINE_MONTH_TOPIC = "klinemon"

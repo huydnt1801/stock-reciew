@@ -13,13 +13,13 @@ class DataCollector():
             lucit_api_secret=BINANCE_API_SECRET,
             lucit_license_token=BINANCE_LICENSE_TOKEN
         )
-        self.flag = {}
+        self.flag_month = {}
+        self.flag_hour = {}
 
         def serializer(message):
             return json.dumps(message).encode('utf-8')
         self.producer = KafkaProducer(bootstrap_servers=['localhost:9092'],
                                       value_serializer=serializer)
-        self.url = Config.BINANCE_INFO_URL
         self.logger = get_logger("Data collector", Config.LOG_FILE)
 
     def message_handler(self, message: str) -> None:
@@ -29,16 +29,22 @@ class DataCollector():
 
         json_result = json_result["data"]["k"]
         symbol = json_result["s"]
-        if json_result["i"] == "1M" and self.flag.get(symbol, False):
+        if json_result["i"] == "1M" and self.flag_month.get(symbol, False):
             self.producer.send(
                 Config.KLINE_MONTH_TOPIC, json_result).add_callback(self.on_send_success).add_errback(self.on_send_error)
-            self.flag[symbol] = False
+            self.flag_month[symbol] = False
+        # if this result is end of hour, push data hour
+        if json_result["i"] == "1h" and json_result["x"]:
+            self.producer.send(
+                Config.KLINE_HOUR_TOPIC, json_result).add_callback(self.on_send_success).add_errback(self.on_send_error)
+            self.flag_hour[symbol] = True
         elif json_result["x"]:
             self.producer.send(
                 Config.KLINE_MINUTES_TOPIC, json_result).add_callback(self.on_send_success).add_errback(self.on_send_error)
             # if this result is end of hour, set flag to send month price info
-            if (json_result["T"] + 1) % 3600 == 0: 
-                self.flag[symbol] = True
+            if self.flag_hour.get(symbol, False):
+                self.flag_month[symbol] = True
+                self.flag_hour[symbol] = False
 
     async def collect_data(self) -> None:
         self.binance_client.create_stream(
