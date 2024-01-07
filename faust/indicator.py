@@ -20,6 +20,8 @@ class Indicator():
                 negative += typicalPrice * dat["volume"]
             prev = typicalPrice
 
+        if positive + negative == 0:
+            return 0
         return 100 - (100 * negative / (positive + negative))
 
     def RSI(self):
@@ -39,8 +41,6 @@ class Indicator():
 
         averagePositive = sum(positive) / len(positive)
         averageNegative = sum(negative) / len(negative)
+        if averagePositive + averageNegative == 0:
+            return 0
         return 100 - (100 * averageNegative / (averagePositive + averageNegative))
-
-
-if __name__ == '__main__':
-    app.main()

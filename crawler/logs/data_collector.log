@@ -1,1 +1,9 @@
-2023-12-19 20:55:03,738 INFO: Start collect data
+2024-01-07 14:07:23,178 INFO: Start collect data
+2024-01-07 14:07:59,994 INFO: Success send msg: {'topic': 'klinemin', 'partition': 0, 'offset': 117}
+2024-01-07 14:07:59,994 INFO: Success send msg: {'topic': 'klinemin', 'partition': 0, 'offset': 118}
+2024-01-07 14:07:59,994 INFO: Success send msg: {'topic': 'klinemin', 'partition': 0, 'offset': 119}
+2024-01-07 14:07:59,995 INFO: Success send msg: {'topic': 'klinemin', 'partition': 0, 'offset': 120}
+2024-01-07 14:07:59,995 INFO: Success send msg: {'topic': 'klinemin', 'partition': 0, 'offset': 121}
+2024-01-07 14:07:59,995 INFO: Success send msg: {'topic': 'klinemin', 'partition': 0, 'offset': 122}
+2024-01-07 14:07:59,995 INFO: Success send msg: {'topic': 'klinemin', 'partition': 0, 'offset': 123}
+2024-01-07 14:07:59,995 INFO: Success send msg: {'topic': 'klinemin', 'partition': 0, 'offset': 124}
