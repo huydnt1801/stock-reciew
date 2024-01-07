@@ -1,4 +1,23 @@
-Bản tin về tình hình tiền ảo:
+from openai import OpenAI
+from datetime import datetime
+
+with open("openaikey.txt", "r") as f:
+    client = OpenAI(api_key=f.readline())
+
+
+def generate_new(msg):
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo-16k",
+        messages=[
+            {"role": "user", "content": f"""từ những thông tin sau hãy viết 1 bản tin về tình hình tiền ảo:\n{msg}"""}],
+        max_tokens=2048,
+        n=1,
+        temperature=0
+    )
+    return response.choices[0].message.content
+
+if __name__ == '__main__':
+    msg = """Bản tin về tình hình tiền ảo:
 Trên thị trường tiền ảo, trong giờ qua, chứng kiến sự biến động nhẹ của các đồng tiền hàng đầu. Giá Bitcoin (BTCUSDT) đã tăng 0.2%, với mức cao nhất đạt 43020.01 và mức thấp nhất là 42784.13 trong khoảng thời gian từ 17:22 đến 17:55 vào ngày 14/12/2023. Chỉ số dòng tiền MFI cho BTCUSDT ở mức 42.3, còn chỉ số kỹ thuật RSI là 33.71 trong 14 giờ gần nhất.
 
 Đồng tiền điện tử khác, Terra (LUNAUSDT), ghi nhận giá cao nhất ở mức 0.9972 và giá thấp nhất là 0.9892 trong cùng một khoảng thời gian. Chỉ số MFI cho LUNAUSDT đạt 20.56, còn chỉ số RSI là 44.52 trong 14 giờ qua.
@@ -19,4 +38,8 @@ Về SOLBTC, giá cao nhất là 0.0016933 và thấp nhất là 0.0016836. Đ�
 
 Cuối cùng, đồng tiền SHIBUSDT có giá cao nhất là 1.012e-05 và thấp nhất là 1.003e-05 trong 14 giờ gần nhất. Chỉ số MFI cho SHIBUSDT đạt 69.53 và chỉ số RSI là 61.62.
 
-Tình hình chung của thị trường tiền ảo trong thời gian gần đây vẫn ghi nhận sự biến động nhẹ với mức giá dao động và các chỉ số kỹ thuật không thay đổi đáng kể.
+Tình hình chung của thị trường tiền ảo trong thời gian gần đây vẫn ghi nhận sự biến động nhẹ với mức giá dao động và các chỉ số kỹ thuật không thay đổi đáng kể."""
+    start = datetime.now()
+    generate_new(msg)
+    end = datetime.now()
+    print((end-start).total_seconds())

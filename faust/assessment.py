@@ -7,14 +7,13 @@ import pymongo
 
 
 class Assessment():
-    def __init__(self, collection, symbol, data):
+    def __init__(self, collection, data, hour_data, month_data):
         self.logger = get_logger("Assessment", Config.LOG_FILE)
         self.collection = collection
-        self.init_score = 1
-        self.interval = "1m"
-        self.type = "giờ"
-        self.symbol = symbol
+        self.symbol = month_data["symbol"]
         self.data = pd.json_normalize(data)
+        self.hour_data = hour_data
+        self.month_data = month_data
         self.res = {}
 
     def price_indexes_change(self, data, thresh_hold):
@@ -25,11 +24,11 @@ class Assessment():
             if index == 0:
                 current_change = row
                 continue
-            if row['high'] / current_change['high'] > thresh_hold:
+            if row['high'] > current_change['high']:
                 increase_indexes.append(index)
                 current_change = row
                 continue
-            if current_change['low'] / row['low'] > thresh_hold:
+            if current_change['low'] > row['low']:
                 reduce_indexes.append(index)
                 current_change = row
                 continue
@@ -57,8 +56,6 @@ class Assessment():
                 increase_ite = increase_ite + 1
                 volume = self.data.iloc[current_index:increase_index].sum()[
                     'volume']
-                if self.type == "ngày":
-                    volume = volume / 60
                 data = self.data.iloc[increase_index]
                 duration = get_minute(
                     self.data.iloc[current_index].loc['open_time'], data.loc['open_time'])
@@ -74,8 +71,6 @@ class Assessment():
                 reduce_ite = reduce_ite + 1
                 volume = self.data.iloc[current_index:reduce_index].sum()[
                     'volume']
-                if self.type == "ngày":
-                    volume = volume / 60
                 data = self.data.iloc[reduce_index]
                 duration = get_minute(
                     self.data.iloc[current_index].loc['open_time'], data.loc['open_time'])
@@ -90,63 +85,41 @@ class Assessment():
     def _cal_medium(self, old, new):
         return float((old * self.medium["idx"] + new) / (self.medium["idx"] + 1))
 
-    def _price(self, idx_max_price, idx_min_price):
-        max = self.data.iloc[idx_max_price].loc
-        min = self.data.iloc[idx_min_price].loc
-        msg = f"""\nTrong {self.type} qua, giá {self.symbol} cao nhất là: {max["high"]} lúc {convert_to_date(max["open_time"])} và thấp nhất là: {min["low"]} lúc {convert_to_date(min["open_time"])}"""
+    def _price(self):
+        max = self.hour_data["high"]
+        min = self.hour_data["low"]
+        msg = f"""\nTrong giờ qua, giá {self.symbol} cao nhất là: {max["high"]} lúc {convert_to_date(max["open_time"])} và thấp nhất là: {min["low"]} lúc {convert_to_date(min["open_time"])}"""
 
-        self.res.update({"price": {"max": float(max["high"]),
-                                   "min": float(min["low"]),
-                                   "max_time": int(max["open_time"]),
-                                   "min_time": int(min["open_time"])}})
-        self.medium["price"]["max"] = self._cal_medium(
-            self.medium["price"]["max"], max["high"])
-        self.medium["price"]["min"] = self._cal_medium(
-            self.medium["price"]["min"], min["low"])
-        if max["high"] > self.medium["price"]["max"] * 1.01 or min["low"] * 1.01 < self.medium["price"]["min"]:
-            return msg
-        return ""
+        return msg
 
-    def _daily_price(self, start_price, end_price):
-        type = 0
+    def _hour_price(self):
         percent = 0
-        if end_price > start_price:
-            type = 1
-            percent = (end_price/start_price - 1) * 100
+        end_price= self.hour_data["close"]
+        start_price= self.hour_data["open"]
+        percent = (end_price/start_price - 1) * 100
+        if percent > 0:
             if percent >= 0.01:
-                msg = f"""\nTrong {self.type} qua, giá {self.symbol} tăng {convert_percent(percent)}%"""
+                msg = f"""\nTrong giờ qua, giá {self.symbol} tăng {convert_percent(percent)}%"""
             else:
-                msg = f"""\nTrong {self.type} qua, giá {self.symbol} tăng {percent}%"""
-        elif end_price < start_price:
-            type = -1
-            percent = 1 - end_price/start_price
+                msg = f"""\nTrong giờ qua, giá {self.symbol} tăng {percent}%"""
+        elif percent < 0:
+            percent = -percent
             if percent >= 0.01:
-                msg = f"""\nTrong {self.type} qua, giá {self.symbol} giảm {convert_percent(percent)}%"""
+                msg = f"""\nTrong giờ qua, giá {self.symbol} giảm {convert_percent(percent)}%"""
             else:
-                msg = f"""\nTrong {self.type} qua, giá {self.symbol} giảm {percent}%"""
+                msg = f"""\nTrong giờ qua, giá {self.symbol} giảm {percent}%"""
 
-        self.res.update(
-            {"daily_price": {"type": type, "percent": float(percent)}})
-        self.medium["daily_price"] = float(self._cal_medium(
-            self.medium["daily_price"], percent))
-        if percent > self.medium["daily_price"]:
+        if percent != 0 and percent > self.medium["change_percent"]:
             return msg
         return ""
 
     def _change_number(self, cnt_change):
-        if cnt_change > 10:
-            msg = f"""\nGiá {self.symbol} trong {self.type} qua có nhiều biến động"""
-        elif cnt_change > 5:
-            msg = f"""\nGiá {self.symbol} trong {self.type} qua có khá nhiều biến động"""
+        if cnt_change > 40:
+            msg = f"""\nGiá {self.symbol} trong giờ qua có nhiều biến động"""
         else:
             msg = ""
 
-        self.res.update({"change_number": int(cnt_change)})
-        self.medium['change_number'] = int(self._cal_medium(
-            self.medium['change_number'], cnt_change))
-        if cnt_change > self.medium['change_number']:
-            return msg
-        return ""
+        return msg
 
     def _volume_analysis(self, high, low):
         max_volume_high = min_volume_high = high[0]
@@ -189,15 +162,9 @@ class Assessment():
 
     def analysis(self):
         high, low, cnt_change = self.process()
-        idx_max_price = self.data["high"].idxmax()
-        idx_min_price = self.data["low"].idxmin()
 
-        close_price = self.data["close"]
-        start_price = close_price[0]
-        end_price = close_price[len(close_price) - 1]
-
-        msg = self._daily_price(start_price, end_price)
-        msg += self._price(idx_max_price, idx_min_price)
+        msg = self._hour_price()
+        msg += self._price()
         msg += self._change_number(cnt_change)
         msg += self._volume_analysis(high, low)
         return msg
