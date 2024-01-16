@@ -10,7 +10,7 @@ class Indicator():
         negative = 0
         prev = None
         for dat in self.data:
-            typicalPrice = (dat["max"] + dat["min"] + dat["close"]) / 3
+            typicalPrice = (dat["high"] + dat["low"] + dat["close"]) / 3
             if prev is None:
                 prev = typicalPrice
                 continue

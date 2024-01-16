@@ -4,6 +4,7 @@ from config import Config
 from normalizer import normalize_data
 import pymongo
 from assessment import Assessment
+from gpt import generate_new
 
 app = faust.App(
     Config.FAUST_NAME,
@@ -31,9 +32,6 @@ async def greet(payloads):
         else:
             metadata[data["symbol"]] = [data]
 
-# save data for indicator
-
-
 @app.agent(hour_topic)
 async def greet(payloads):
     async for payload in payloads:
@@ -48,14 +46,15 @@ async def greet(payloads):
 async def greet(payloads):
     async for payload in payloads:
         data = normalize_data(payload)
-        start = datetime.now()
+        collection = db[data["symbol"]]
+        cursor = collection.find_one().limit(14)
         assessment = Assessment(
-            db[data["symbol"]],  metadata[data["symbol"]], hour_data[data["symbol"]], data)
+            collection,  metadata[data["symbol"]], hour_data[data["symbol"]], data)
         metadata[data["symbol"]] = []
         metadata[data["symbol"]] = {}
-        await assessment.start()
-        end = datetime.now()
-        print((end-start).total_seconds() * 1000)
+        msg = await assessment.start()
+        message = await generate_new(msg)
+        collection.insert_one(msg)
 
 if __name__ == '__main__':
     app.main()

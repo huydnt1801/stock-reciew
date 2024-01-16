@@ -10,3 +10,11 @@ db = client['crypto_assessment']
 def home_page():
     x = db.test.find_one()
     return x, 200
+
+@app.route("/health/check")
+def health():
+    return "", 200
+
+@app.route("/health/ready")
+def ready():
+    return "", 200

@@ -6,6 +6,11 @@ def convert_to_date(timestamp):
     return dt_object
 
 
+def convert_to_hour(timestamp):
+    dt_object = datetime.fromtimestamp(timestamp/1000)
+    return f"{dt_object.hour}:{dt_object.minute}"
+
+
 def get_second(start, end):
     duration = end - start
     return duration / 1000
@@ -14,9 +19,6 @@ def get_second(start, end):
 def get_minute(start, end):
     duration = end - start
     return duration / 1000 / 60
-
-    # self.logger.info(pd.DataFrame(
-    #     self.data, index=[increase_index]))
 
 
 def convert_percent(percent):

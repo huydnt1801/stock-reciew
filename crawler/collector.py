@@ -1,7 +1,7 @@
 from datetime import datetime
 import json
 import asyncio
-from unicorn_binance_websocket_api import BinanceWebSocketApiManager
+# from unicorn_binance_websocket_api import BinanceWebSocketApiManager
 
 from config import Config, BINANCE_LICENSE_TOKEN, BINANCE_API_SECRET
 from utils.logger import get_logger
@@ -10,45 +10,55 @@ from kafka import KafkaProducer
 
 class DataCollector():
     def __init__(self) -> None:
-        self.binance_client = BinanceWebSocketApiManager(
-            lucit_api_secret=BINANCE_API_SECRET,
-            lucit_license_token=BINANCE_LICENSE_TOKEN
-        )
+        # self.binance_client = BinanceWebSocketApiManager(
+        #     lucit_api_secret=BINANCE_API_SECRET,
+        #     lucit_license_token=BINANCE_LICENSE_TOKEN
+        # )
         self.flag_month = {}
-        self.flag_hour = {}
+        self.logger = get_logger("Data collector", Config.LOG_FILE)
 
         def serializer(message):
             return json.dumps(message).encode('utf-8')
-        self.producer = KafkaProducer(bootstrap_servers=['localhost:19092', 'localhost:29092', 'localhost:39092'],
-                                      value_serializer=serializer)
-        self.logger = get_logger("Data collector", Config.LOG_FILE)
+        try:
+            self.producer = KafkaProducer(bootstrap_servers=['localhost:19092', 'localhost:29092', 'localhost:39092'],
+                                        value_serializer=serializer)
+        except Exception as e:
+            self.logger.info(e)
 
     def message_handler(self, message: str) -> None:
-        # start = datetime.now()
         json_result = json.loads(message)
         if "result" in json_result and not json_result["result"]:
             return
 
         json_result = json_result["data"]["k"]
         symbol = json_result["s"]
-        if json_result["i"] == "1M" and self.flag_month.get(symbol, False):
-            self.producer.send(
-                Config.KLINE_MONTH_TOPIC, json_result).add_callback(self.on_send_success).add_errback(self.on_send_error)
-            self.flag_month[symbol] = False
+        if json_result["i"] == "1M":
+            if self.flag_month.get(symbol, False):
+                try:
+                    self.producer.send(
+                        Config.KLINE_MONTH_TOPIC, json_result).add_callback(self.on_send_success).add_errback(self.on_send_error)
+                except Exception as e:
+                    self.logger.info(e)
+                self.flag_month[symbol] = False
+            return Config.KLINE_MONTH_TOPIC
         # if this result is end of hour, push data hour
-        if json_result["i"] == "1h" and json_result["x"]:
-            self.producer.send(
-                Config.KLINE_HOUR_TOPIC, json_result).add_callback(self.on_send_success).add_errback(self.on_send_error)
-            self.flag_hour[symbol] = True
-        elif json_result["x"]:
-            self.producer.send(
-                Config.KLINE_MINUTES_TOPIC, json_result).add_callback(self.on_send_success).add_errback(self.on_send_error)
-            # if this result is end of hour, set flag to send month price info
-            if self.flag_hour.get(symbol, False):
+        elif json_result["i"] == "1h":
+            if json_result["x"]:
+                try:
+                    self.producer.send(
+                        Config.KLINE_HOUR_TOPIC, json_result).add_callback(self.on_send_success).add_errback(self.on_send_error)
+                except Exception as e:
+                    self.logger.info(e)
                 self.flag_month[symbol] = True
-                self.flag_hour[symbol] = False
-            # end = datetime.now()
-            # print((end-start).total_seconds() * 1000)
+            return Config.KLINE_HOUR_TOPIC
+        elif json_result["i"] == "1m" and json_result["x"]:
+            try:
+                self.producer.send(
+                    Config.KLINE_MINUTES_TOPIC, json_result).add_callback(self.on_send_success).add_errback(self.on_send_error)
+            except Exception as e:
+                self.logger.info(e)
+            return Config.KLINE_MINUTES_TOPIC
+        return "END"
 
     async def collect_data(self) -> None:
         self.binance_client.create_stream(

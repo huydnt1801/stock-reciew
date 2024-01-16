@@ -8,10 +8,12 @@ import pymongo
 
 class Assessment():
     def __init__(self, collection, data, hour_data, month_data):
+        print(data)
         self.logger = get_logger("Assessment", Config.LOG_FILE)
         self.collection = collection
-        self.symbol = month_data["symbol"]
+        self.symbol = collection
         self.data = pd.json_normalize(data)
+        print(self.data)
         self.hour_data = hour_data
         self.month_data = month_data
         self.res = {}
@@ -36,7 +38,7 @@ class Assessment():
 
     def process(self):
         increase_indexes, reduce_indexes = self.price_indexes_change(
-            self.data, Config.THRESH_HOLD)
+            self.data, 0)
         current_index = 0
         data = self.data.iloc[current_index]
         high = []
@@ -88,7 +90,7 @@ class Assessment():
     def _price(self):
         max = self.hour_data["high"]
         min = self.hour_data["low"]
-        msg = f"""\nTrong giờ qua, giá {self.symbol} cao nhất là: {max["high"]} lúc {convert_to_date(max["open_time"])} và thấp nhất là: {min["low"]} lúc {convert_to_date(min["open_time"])}"""
+        msg = f"""\nTrong giờ qua, giá {self.symbol} cao nhất là: {max} lúc {convert_to_hour(self.data.iloc[7]["open_time"])} và thấp nhất là: {min} lúc {convert_to_hour(self.data.iloc[45]["open_time"])}"""
 
         return msg
 
@@ -99,17 +101,17 @@ class Assessment():
         percent = (end_price/start_price - 1) * 100
         if percent > 0:
             if percent >= 0.01:
-                msg = f"""\nTrong giờ qua, giá {self.symbol} tăng {convert_percent(percent)}%"""
+                msg = f"""\nTrong giờ qua, giá {self.symbol} tăng {convert_percent(percent)}% từ {start_price} lên {end_price}"""
             else:
-                msg = f"""\nTrong giờ qua, giá {self.symbol} tăng {percent}%"""
+                msg = f"""\nTrong giờ qua, giá {self.symbol} tăng {percent}% từ {start_price} lên {end_price}"""
         elif percent < 0:
             percent = -percent
             if percent >= 0.01:
-                msg = f"""\nTrong giờ qua, giá {self.symbol} giảm {convert_percent(percent)}%"""
+                msg = f"""\nTrong giờ qua, giá {self.symbol} giảm {convert_percent(percent)}% từ {start_price} xuống {end_price}"""
             else:
-                msg = f"""\nTrong giờ qua, giá {self.symbol} giảm {percent}%"""
+                msg = f"""\nTrong giờ qua, giá {self.symbol} giảm {percent}% từ {start_price} xuống {end_price}"""
 
-        if percent != 0 and percent > self.medium["change_percent"]:
+        if percent != 0:
             return msg
         return ""
 
@@ -139,25 +141,18 @@ class Assessment():
         max_volume_high_end = self.data.iloc[max_volume_high['end_idx']].loc
         max_volume_high_percent = (
             max_volume_high_end["high"] / max_volume_high_start["low"] - 1) * 100
-        msg = f"""\nTừ {convert_to_date(max_volume_high_start["open_time"])} đến {convert_to_date(max_volume_high_end["open_time"])} {self.symbol} tăng {convert_percent(max_volume_high_percent)}% với volume trung bình cao nhất {max_volume_high['volume_arg']}/phút"""
+        msg = f"""\nTừ {convert_to_hour(max_volume_high_start["open_time"])} đến {convert_to_hour(max_volume_high_end["open_time"])} {self.symbol} tăng {convert_percent(max_volume_high_percent)}% với volume trung bình cao nhất {convert_percent(max_volume_high['volume_arg'])}/phút"""
 
         self.res.update({"volume_increase": {"start_time": int(max_volume_high_start["open_time"]), "end_time": int(max_volume_high_end[
                         "open_time"]), "percent": float(max_volume_high_percent), "value": float(max_volume_high['volume_arg'])}})
-        if max_volume_high['volume_arg'] < self.medium["volume_increase"]:
-            msg = ""
-        self.medium["volume_increase"] = self._cal_medium(
-            self.medium["volume_increase"], max_volume_high['volume_arg'])
 
         max_volume_low_start = self.data.iloc[max_volume_low['start_idx']].loc
         max_volume_low_end = self.data.iloc[max_volume_low['end_idx']].loc
         max_volume_low_percent = (
             1 - max_volume_low_end["low"] / max_volume_low_start["high"]) * 100
-        if max_volume_low['volume_arg'] > self.medium["volume_reduce"]:
-            msg += f"""\nTừ {convert_to_date(max_volume_low_start["open_time"])} đến {convert_to_date(max_volume_low_end["open_time"])} {self.symbol} giảm {convert_percent(max_volume_low_percent)}% với volume trung bình cao nhất {max_volume_low['volume_arg']}/phút"""
+        msg += f"""\nTừ {convert_to_hour(max_volume_low_start["open_time"])} đến {convert_to_hour(max_volume_low_end["open_time"])} {self.symbol} giảm {convert_percent(max_volume_low_percent)}% với volume trung bình cao nhất {convert_percent(max_volume_low['volume_arg'])}/phút"""
         self.res.update({"volume_reduce": {"start_time": int(max_volume_low_start["open_time"]), "end_time": int(max_volume_low_end[
             "open_time"]), "percent": float(max_volume_low_percent), "value": float(max_volume_low['volume_arg'])}})
-        self.medium["volume_reduce"] = self._cal_medium(
-            self.medium["volume_reduce"], max_volume_low['volume_arg'])
         return msg
 
     def analysis(self):
@@ -172,27 +167,10 @@ class Assessment():
     async def start(self):
         self.logger.info("Start Assessment")
         try:
-            cursor = self.collection.find_one()
-            self.medium = {
-                "idx": 0,
-                "daily_price": 0,
-                "price": {
-                    "max": 0,
-                    "min": 0,
-                },
-                "change_number": 0,
-                "volume_increase": 0,
-                "volume_reduce": 0,
-            }
-            if cursor is not None:
-                arg = dict(cursor)
-                if arg.get('medium', None) is not None:
-                    self.medium = arg["medium"]
             msg = self.analysis()
             self.logger.info(msg)
-            self.medium["idx"] += 1
-            self.collection.insert_one(
-                {"current": self.res, "medium": self.medium})
+            # self.collection.insert_one({})
+            return msg
             self.stop()
         except Exception as e:
             self.logger.error(f"{e}")
