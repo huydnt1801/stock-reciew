@@ -1,11 +1,14 @@
+from utils.helper import *
+
+
 class Indicator():
-    def __init__(self, data):
+    def __init__(self, symbol, data):
         self.data = data
-        # data 15 giai doan
-        # typicalPrice = (max + min + close) / 3
-        # typicalPrice and volume
+        self.symbol = symbol
 
     def MFI(self):
+        if len(self.data) < 15:
+            return 0
         positive = 0
         negative = 0
         prev = None
@@ -25,6 +28,8 @@ class Indicator():
         return 100 - (100 * negative / (positive + negative))
 
     def RSI(self):
+        if len(self.data) < 15:
+            return 0
         positive = []
         negative = []
         prev = None
@@ -44,3 +49,16 @@ class Indicator():
         if averagePositive + averageNegative == 0:
             return 0
         return 100 - (100 * averageNegative / (averagePositive + averageNegative))
+
+    def indicator_msg(self):
+        rsi = convert_percent(self.RSI())
+        mfi = convert_percent(self.MFI())
+        time = convert_to_hour(self.data[0]['event_time'] + 3600000)
+        msg = ""
+        if rsi != 0 and mfi != 0:
+            msg += f"{self.symbol} có chỉ báo RSI đạt {rsi} và MFI đạt {mfi} lúc {time}"
+        elif rsi != 0:
+            msg += f"{self.symbol} có chỉ báo RSI đạt {rsi} lúc {time}"
+        elif mfi != 0:
+            msg += f"{self.symbol} có chỉ báo MFI đạt {mfi} lúc {time}"
+        return msg

@@ -2,19 +2,17 @@ from config import Config
 from utils.helper import *
 from utils.logger import get_logger
 import pandas as pd
-import math
-import pymongo
 
 
 class Assessment():
-    def __init__(self, collection, data, hour_data, month_data):
-        print(data)
+    def __init__(self, symbol, collection, data, hour_data, month_data):
         self.logger = get_logger("Assessment", Config.LOG_FILE)
         self.collection = collection
-        self.symbol = collection
+        self.symbol = symbol
         self.data = pd.json_normalize(data)
         print(self.data)
-        self.hour_data = hour_data
+        self.hour_data = hour_data[0]
+        self.hour_data_indicator = hour_data
         self.month_data = month_data
         self.res = {}
 
@@ -90,7 +88,13 @@ class Assessment():
     def _price(self):
         max = self.hour_data["high"]
         min = self.hour_data["low"]
-        msg = f"""\nTrong giờ qua, giá {self.symbol} cao nhất là: {max} lúc {convert_to_hour(self.data.iloc[7]["open_time"])} và thấp nhất là: {min} lúc {convert_to_hour(self.data.iloc[45]["open_time"])}"""
+        max_time = min_time = ""
+        try:
+            max_time = "lúc " + convert_to_hour(self.data.iloc[7]["open_time"])
+            min_time = "lúc " + convert_to_hour(self.data.iloc[45]["open_time"])
+        except Exception as e:
+            self.logger.error(e)
+        msg = f"""\nTrong giờ qua, giá {self.symbol} cao nhất là: {max} {max_time} và thấp nhất là: {min} {min_time}"""
 
         return msg
 
@@ -156,12 +160,15 @@ class Assessment():
         return msg
 
     def analysis(self):
-        high, low, cnt_change = self.process()
-
         msg = self._hour_price()
         msg += self._price()
-        msg += self._change_number(cnt_change)
-        msg += self._volume_analysis(high, low)
+        try:
+            high, low, cnt_change = self.process()
+
+            msg += self._change_number(cnt_change)
+            msg += self._volume_analysis(high, low)
+        except Exception as e:
+            self.logger.info(e)
         return msg
 
     async def start(self):
@@ -170,8 +177,8 @@ class Assessment():
             msg = self.analysis()
             self.logger.info(msg)
             # self.collection.insert_one({})
-            return msg
             self.stop()
+            return msg
         except Exception as e:
             self.logger.error(f"{e}")
             self.stop()

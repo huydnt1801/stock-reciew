@@ -7,10 +7,10 @@ from indicator import Indicator
 data_min = pd.read_csv(f'{os.path.dirname(os.path.realpath(__file__))}/data/BTCUSDT-1m.csv')
 data_hour = pd.read_csv(f'{os.path.dirname(os.path.realpath(__file__))}/data/BTCUSDT-1h.csv')
 assessment = Assessment(
-            "BTCUSDT",  data_min.to_dict(orient="records"), data_hour.to_dict(orient="records")[0], data_hour.to_dict(orient="records")[0])
+            "BTCUSDT", "BTCUSDT",  data_min.to_dict(orient="records"), data_hour.to_dict(orient="records")[0:15], data_hour.to_dict(orient="records")[0])
 high, low, cnt_change = assessment.process()
 
-indicator = Indicator(data_hour.to_dict(orient="records")[0:15])
+indicator = Indicator("BTCUSDT", data_hour.to_dict(orient="records")[0:15])
 class TestProcessing:
     def test_process_price(self):
         msg = assessment._hour_price()

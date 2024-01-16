@@ -16,3 +16,5 @@ class Config:
     KLINE_MINUTES_TOPIC = "klinemin"
     KLINE_HOUR_TOPIC = "klinehour"
     KLINE_MONTH_TOPIC = "klinemon"
+
+    DB_URL = "mongodb://admin:admin@localhost:27017/"
