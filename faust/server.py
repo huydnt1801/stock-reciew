@@ -39,10 +39,11 @@ async def greet_hour(payloads):
         collection = db[data["symbol"]]
         res = collection.insert_one({
             "event_time": data["open_time"],
+            "open": data["open"],
             "high": data["high"],
             "low": data["low"],
             "close": data["close"],
-            "open": data["open"],
+            "volume": data["volume"],
         })
         print(res.inserted_id)
 

@@ -4,7 +4,7 @@ import os
 class Config:
     LOG_FILE = f'{os.path.dirname(os.path.realpath(__file__))}/logs/assessment.log'
     FAUST_NAME = "data_loader"
-    THRESH_HOLD = 1.000001
+    THRESH_HOLD = 1.01
 
     SYMBOL_LEN = 1
 

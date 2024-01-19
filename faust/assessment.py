@@ -16,7 +16,7 @@ class Assessment():
         self.month_data = month_data
         self.res = {}
 
-    def price_indexes_change(self, data, thresh_hold):
+    def price_indexes_change(self, data):
         increase_indexes = []
         reduce_indexes = []
 
@@ -36,7 +36,7 @@ class Assessment():
 
     def process(self):
         increase_indexes, reduce_indexes = self.price_indexes_change(
-            self.data, 0)
+            self.data)
         current_index = 0
         data = self.data.iloc[current_index]
         high = []
@@ -88,32 +88,36 @@ class Assessment():
     def _price(self):
         max = self.hour_data["high"]
         min = self.hour_data["low"]
-        max_time = min_time = ""
-        try:
-            max_time = "lúc " + convert_to_hour(self.data.iloc[7]["open_time"])
-            min_time = "lúc " + convert_to_hour(self.data.iloc[45]["open_time"])
-        except Exception as e:
-            self.logger.error(e)
-        msg = f"""\nTrong giờ qua, giá {self.symbol} cao nhất là: {max} {max_time} và thấp nhất là: {min} {min_time}"""
+        msg = ""
+        if self.month_data["high"] / max < Config.THRESH_HOLD or min/self.month_data["low"] < Config.THRESH_HOLD: 
+            max_time = min_time = ""
+            try:
+                max_time = "lúc " + convert_to_hour(self.data.iloc[7]["open_time"])
+                min_time = "lúc " + convert_to_hour(self.data.iloc[45]["open_time"])
+            except Exception as e:
+                self.logger.error(e)
+            msg = f"""\nTrong giờ qua, giá {self.symbol} cao nhất là: {max} {max_time} và thấp nhất là: {min} {min_time}"""
 
         return msg
 
     def _hour_price(self):
         percent = 0
+        inc = red = 0
         end_price= self.hour_data["close"]
         start_price= self.hour_data["open"]
+        for dat in self.hour_data_indicator:
+            if dat["close"] > dat["open"]:
+                inc += 1
+            else:
+                red += 1
         percent = (end_price/start_price - 1) * 100
         if percent > 0:
-            if percent >= 0.01:
+            if inc/red < 1/3 and percent >= 0.01:
                 msg = f"""\nTrong giờ qua, giá {self.symbol} tăng {convert_percent(percent)}% từ {start_price} lên {end_price}"""
-            else:
-                msg = f"""\nTrong giờ qua, giá {self.symbol} tăng {percent}% từ {start_price} lên {end_price}"""
         elif percent < 0:
             percent = -percent
-            if percent >= 0.01:
+            if red/inc < 1/3 and percent >= 0.01:
                 msg = f"""\nTrong giờ qua, giá {self.symbol} giảm {convert_percent(percent)}% từ {start_price} xuống {end_price}"""
-            else:
-                msg = f"""\nTrong giờ qua, giá {self.symbol} giảm {percent}% từ {start_price} xuống {end_price}"""
 
         if percent != 0:
             return msg
@@ -149,7 +153,7 @@ class Assessment():
 
         self.res.update({"volume_increase": {"start_time": int(max_volume_high_start["open_time"]), "end_time": int(max_volume_high_end[
                         "open_time"]), "percent": float(max_volume_high_percent), "value": float(max_volume_high['volume_arg'])}})
-
+        # compare
         max_volume_low_start = self.data.iloc[max_volume_low['start_idx']].loc
         max_volume_low_end = self.data.iloc[max_volume_low['end_idx']].loc
         max_volume_low_percent = (
