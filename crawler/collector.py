@@ -1,4 +1,3 @@
-from datetime import datetime
 import json
 import asyncio
 from unicorn_binance_websocket_api import BinanceWebSocketApiManager
@@ -26,7 +25,8 @@ class DataCollector():
         def serializer(message):
             return json.dumps(message).encode('utf-8')
         try:
-            self.producer = KafkaProducer(bootstrap_servers=['localhost:19092', 'localhost:29092', 'localhost:39092'],
+            print(Config.KAFKA_BROKERS)
+            self.producer = KafkaProducer(bootstrap_servers=Config.KAFKA_BROKERS,
                                         value_serializer=serializer)
         except Exception as e:
             self.logger.error(e)
@@ -39,7 +39,7 @@ class DataCollector():
         json_result = json_result["data"]["k"]
         symbol = json_result["s"]
         if json_result["i"] == "1M":
-            event_time = self.flag_month.get(symbol, 1696809600000)
+            event_time = self.flag_month.get(symbol, None)
             if event_time:
                 collection = self.db[symbol]
                 cur = collection.find_one({"event_time": event_time})
@@ -93,8 +93,8 @@ class DataCollector():
     def start(self) -> None:
         self.logger.info("Start collect data")
         try:
-            # asyncio.run(self.collect_data())
-            self.message_handler(json.dumps({"data": {"k": {"t": 1696809600000, "T": 1697414399999, "s": "BTCUSDT", "i": "1M", "f": 69915457, "L": 69937421, "o": "0.00000316", "c": "0.00000317", "h": "0.00000324", "l": "0.00000311", "v": "65229990.00000000", "n": 21965, "x": True, "q": "206.97094079", "V": "32330456.00000000", "Q": "102.73648818", "B": "0"}}}))
+            asyncio.run(self.collect_data())
+            # self.message_handler(json.dumps({"data": {"k": {"t": 1696809600000, "T": 1697414399999, "s": "BTCUSDT", "i": "1M", "f": 69915457, "L": 69937421, "o": "0.00000316", "c": "0.00000317", "h": "0.00000324", "l": "0.00000311", "v": "65229990.00000000", "n": 21965, "x": True, "q": "206.97094079", "V": "32330456.00000000", "Q": "102.73648818", "B": "0"}}}))
         except Exception as e:
             self.logger.error(f"{e}")
             self.stop()

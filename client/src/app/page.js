@@ -7,7 +7,7 @@ export default function Home() {
   const [data, setData] = useState([])
   const [data2, setData2] = useState([])
   useEffect(() => {
-    axios.get("http://localhost:5000/api/v1/news").then(res => {
+    axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/v1/news`).then(res => {
       setData(res.data.slice(0,4))
       setData2(res.data.slice(4,8))
     })

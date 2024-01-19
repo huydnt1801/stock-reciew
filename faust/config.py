@@ -1,4 +1,5 @@
 import os
+import json
 
 
 class Config:
@@ -8,6 +9,7 @@ class Config:
 
     SYMBOL_LEN = 1
 
-    DB_URL = "mongodb://admin:admin@localhost:27017/"
+    KAFKA_BROKERS = json.loads(os.getenv("KAFKA_BROKERS"))
+    DB_URL = os.getenv("DB_URL")
 
     OPENAI_KEY = "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"

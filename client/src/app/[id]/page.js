@@ -9,7 +9,7 @@ export default function Detail() {
   const [interval, setInterval] = useState(null);
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/api/v1/news${pathname}`)
+      .get(`${process.env.NEXT_PUBLIC_BE_URL}/api/v1/news${pathname}`)
       .then((res) => {
         setData(res.data);
       });

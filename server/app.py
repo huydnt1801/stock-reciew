@@ -1,15 +1,20 @@
+import os
 from flask import Flask, request, json
 from flask.json import jsonify
 from pymongo import MongoClient
 from bson import ObjectId
 from flask_cors import CORS
 
+try:
+    client = MongoClient(
+        f"{os.getenv('DB_URL')}", authSource="admin")
+    db = client['crypto_assessment']
+except:
+    print(os.getenv('DB_URL'))
+    print("failed to connect DB")
 app = Flask(__name__)
 json.provider.DefaultJSONProvider.ensure_ascii = False
 CORS(app)
-client = MongoClient(
-    "mongodb://admin:admin@localhost:27017/crypto_assessment", authSource="admin")
-db = client['crypto_assessment']
 
 @app.route("/api/v1/news")
 def home_page():
@@ -19,11 +24,13 @@ def home_page():
         skip = (int(args.get("page", 1)) - 1)*limit
         cursor = db.news.find().skip(skip).sort({"_id": -1}).limit(limit)
         res = []
-        for x in cursor:
-            x["_id"] = str(x["_id"])
-            res.append(x)
+        if cursor is not None:
+            for x in cursor:
+                x["_id"] = str(x["_id"])
+                res.append(x)
         return jsonify(res), 200
-    except:
+    except Exception as e:
+        print(e)
         return "invalid param", 400
 
 
@@ -33,7 +40,8 @@ def new(new_id):
         res = db.news.find_one({"_id": ObjectId(new_id)})
         res["_id"] = str(res["_id"])
         return jsonify(res), 200
-    except:
+    except Exception as e:
+        print(e)
         return "", 404
 
 
@@ -48,4 +56,4 @@ def ready():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host="0.0.0.0", port=5000)

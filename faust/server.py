@@ -1,4 +1,3 @@
-import datetime
 import faust
 from config import Config
 from normalizer import normalize_data
@@ -7,10 +6,10 @@ from assessment import Assessment
 from indicator import Indicator
 from gpt import generate_new
 
+print(Config.KAFKA_BROKERS)
 app = faust.App(
     Config.FAUST_NAME,
-    broker=['kafka://localhost:19092',
-            'kafka://localhost:29092', 'kafka://localhost:39092'],
+    broker=Config.KAFKA_BROKERS,
     value_serializer='raw',
     consumer_reconnect_max_retries=10,
 )

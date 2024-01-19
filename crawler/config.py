@@ -1,7 +1,8 @@
 import os
+import json
 
-BINANCE_LICENSE_TOKEN = 'd7bdb376-7cc7-4948-b835-t770d1cdc4a98'
-BINANCE_API_SECRET = '15cd20176434f5188135d0ae4487621e7a900fc7d2e3e47c3e36ab07f36e7f35'
+BINANCE_LICENSE_TOKEN = os.getenv("BINANCE_LICENSE_TOKEN")
+BINANCE_API_SECRET = os.getenv("BINANCE_API_SECRET")
 
 
 class Config:
@@ -17,4 +18,5 @@ class Config:
     KLINE_HOUR_TOPIC = "klinehour"
     KLINE_MONTH_TOPIC = "klinemon"
 
-    DB_URL = "mongodb://admin:admin@localhost:27017/"
+    DB_URL = os.getenv("DB_URL")
+    KAFKA_BROKERS = json.loads(os.getenv("KAFKA_BROKERS"))
