@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: faust-deployment
+  labels:
+    app: faust
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: faust
+  template:
+    metadata:
+      labels:
+        app: faust
+    spec:
+      containers:
+      - name: faust
+        image: tienhuy1801/faust:v1
+        ports:
+        - containerPort: 80
+        env:
+        - name: DB_URL
+          value: "mongodb://admin:admin@mongodb-service/"
+        - name: KAFKA_BROKERS
+          value: '["kafka-service"]'
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: faust-service
+spec:
+  selector:
+    app: faust
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80

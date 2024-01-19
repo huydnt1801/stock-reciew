@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crawler-deployment
+  labels:
+    app: crawler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crawler
+  template:
+    metadata:
+      labels:
+        app: crawler
+    spec:
+      containers:
+      - name: crawler
+        image: tienhuy1801/crawler:v1
+        ports:
+        - containerPort: 80
+        env:
+        - name: DB_URL
+          value: "mongodb://admin:admin@mongodb-service/"
+        - name: KAFKA_BROKERS
+          value: '["kafka-service"]'
+        - name: BINANCE_LICENSE_TOKEN
+          value: "841275ca-7ea0-4894-9e93-t7da79bd378af"
+        - name: BINANCE_API_SECRET
+          value: "21b823bdfba0f3e3b998b55a8d0ba4d6322e0dbe2120374103d08e9fbce7063e"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: crawler-service
+spec:
+  selector:
+    app: crawler
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
