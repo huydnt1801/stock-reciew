@@ -44,8 +44,11 @@ class Indicator():
                 negative.append(prev - typicalPrice)
             prev = typicalPrice
 
-        averagePositive = sum(positive) / len(positive)
-        averageNegative = sum(negative) / len(negative)
+        averagePositive = averageNegative = 0
+        if len(positive) != 0:
+            averagePositive = sum(positive) / len(positive)
+        if len(negative) != 0:
+            averageNegative = sum(negative) / len(negative)
         if averagePositive + averageNegative == 0:
             return 0
         return 100 - (100 * averageNegative / (averagePositive + averageNegative))

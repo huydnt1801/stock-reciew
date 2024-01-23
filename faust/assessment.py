@@ -7,10 +7,11 @@ import pandas as pd
 class Assessment():
     def __init__(self, symbol, collection, data, hour_data, month_data):
         self.logger = get_logger("Assessment", Config.LOG_FILE)
+        print(len(data))
+        print(len(hour_data))
         self.collection = collection
         self.symbol = symbol
         self.data = pd.json_normalize(data)
-        print(self.data)
         self.hour_data = hour_data[0]
         self.hour_data_indicator = hour_data
         self.month_data = month_data
@@ -89,7 +90,7 @@ class Assessment():
         max = self.hour_data["high"]
         min = self.hour_data["low"]
         msg = ""
-        if self.month_data["high"] / max < Config.THRESH_HOLD or min/self.month_data["low"] < Config.THRESH_HOLD: 
+        if self.month_data["high"] / max < 1.01 or min/self.month_data["low"] < 1.01: 
             max_time = min_time = ""
             try:
                 max_time = "lúc " + convert_to_hour(self.data.iloc[7]["open_time"])
@@ -111,17 +112,20 @@ class Assessment():
             else:
                 red += 1
         percent = (end_price/start_price - 1) * 100
+        msg = ""
         if percent > 0:
-            if inc/red < 1/3 and percent >= 0.01:
+            if percent >= 0.01:
                 msg = f"""\nTrong giờ qua, giá {self.symbol} tăng {convert_percent(percent)}% từ {start_price} lên {end_price}"""
+            if red != 0 and inc/red > 1/3:
+                msg = ""
         elif percent < 0:
             percent = -percent
-            if red/inc < 1/3 and percent >= 0.01:
+            if percent >= 0.01:
                 msg = f"""\nTrong giờ qua, giá {self.symbol} giảm {convert_percent(percent)}% từ {start_price} xuống {end_price}"""
+            if inc != 0 and red/inc > 1/3:
+                msg = ""
 
-        if percent != 0:
-            return msg
-        return ""
+        return msg
 
     def _change_number(self, cnt_change):
         if cnt_change > 40:

@@ -25,7 +25,6 @@ class DataCollector():
         def serializer(message):
             return json.dumps(message).encode('utf-8')
         try:
-            print(Config.KAFKA_BROKERS)
             self.producer = KafkaProducer(bootstrap_servers=Config.KAFKA_BROKERS,
                                         value_serializer=serializer)
         except Exception as e:
@@ -77,7 +76,7 @@ class DataCollector():
             process_stream_data=self.message_handler
         )
         while True:
-            await asyncio.sleep(1)
+            await asyncio.sleep(2)
 
     def on_send_success(self, record_metadata):
         info = {

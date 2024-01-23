@@ -6,7 +6,6 @@ from assessment import Assessment
 from indicator import Indicator
 from gpt import generate_new
 
-print(Config.KAFKA_BROKERS)
 app = faust.App(
     Config.FAUST_NAME,
     broker=Config.KAFKA_BROKERS,
@@ -77,6 +76,7 @@ async def greet_mon(payloads):
                 print("news_id: " + str(new.inserted_id))
             except Exception as e:
                 print(e)
+            msg_summary = ""
             symbol_list = set()
 
 if __name__ == '__main__':

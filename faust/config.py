@@ -7,9 +7,9 @@ class Config:
     FAUST_NAME = "data_loader"
     THRESH_HOLD = 1.01
 
-    SYMBOL_LEN = 1
+    SYMBOL_LEN = int(os.getenv("SYMBOL_LEN"))
 
     KAFKA_BROKERS = json.loads(os.getenv("KAFKA_BROKERS"))
     DB_URL = os.getenv("DB_URL")
 
-    OPENAI_KEY = "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"
+    OPENAI_KEY = os.getenv("OPENAI_KEY")
