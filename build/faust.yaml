@@ -27,7 +27,7 @@ spec:
         - name: OPENAI_KEY
           value: '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'
         - name: SYMBOL_LEN
-          value: 8
+          value: "8"
 ---
 apiVersion: v1
 kind: Service

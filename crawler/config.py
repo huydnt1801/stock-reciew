@@ -19,4 +19,4 @@ class Config:
     KLINE_MONTH_TOPIC = "klinemon"
 
     DB_URL = os.getenv("DB_URL")
-    KAFKA_BROKERS = json.loads(os.getenv("KAFKA_BROKERS"))
+    KAFKA_BROKERS = json.loads(os.getenv("KAFKA_BROKERS", "{}"))

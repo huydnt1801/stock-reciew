@@ -7,7 +7,7 @@ def convert_to_date(timestamp):
 
 
 def convert_to_hour(timestamp):
-    dt_object = datetime.fromtimestamp(timestamp/1000)
+    dt_object = datetime.fromtimestamp(timestamp/1000 + 7*3600)
     return f"{dt_object.hour}:{dt_object.minute}"
 
 

@@ -116,14 +116,14 @@ class Assessment():
         if percent > 0:
             if percent >= 0.01:
                 msg = f"""\nTrong giờ qua, giá {self.symbol} tăng {convert_percent(percent)}% từ {start_price} lên {end_price}"""
-            if red != 0 and inc/red > 1/3:
-                msg = ""
+            # if red != 0 and inc/red > 1/3:
+            #     msg = ""
         elif percent < 0:
             percent = -percent
             if percent >= 0.01:
                 msg = f"""\nTrong giờ qua, giá {self.symbol} giảm {convert_percent(percent)}% từ {start_price} xuống {end_price}"""
-            if inc != 0 and red/inc > 1/3:
-                msg = ""
+            # if inc != 0 and red/inc > 1/3:
+            #     msg = ""
 
         return msg
 

@@ -7,7 +7,7 @@ from flask_cors import CORS
 
 try:
     client = MongoClient(
-        f"{os.getenv('DB_URL')}", authSource="admin")
+        f"{os.getenv('DB_URL', 'mongodb+srv://tienhuy1801:nt030201@cluster0.b2zl2.mongodb.net/')}", authSource="admin")
     db = client['crypto_assessment']
 except:
     print(os.getenv('DB_URL'))
@@ -27,6 +27,9 @@ def home_page():
         if cursor is not None:
             for x in cursor:
                 x["_id"] = str(x["_id"])
+                msg = x["message"].split("\n\n")[1:]
+                x["message"] = "\n\n".join(msg)
+                x["event_time"] = x["event_time"] + 3600000
                 res.append(x)
         return jsonify(res), 200
     except Exception as e:
@@ -38,7 +41,10 @@ def home_page():
 def new(new_id):
     try:
         res = db.news.find_one({"_id": ObjectId(new_id)})
+        print(res)
         res["_id"] = str(res["_id"])
+        msg = res["message"].split("\n\n")[1:]
+        res["message"] = "\n\n".join(msg)
         return jsonify(res), 200
     except Exception as e:
         print(e)

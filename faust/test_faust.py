@@ -14,8 +14,7 @@ indicator = Indicator("BTCUSDT", data_hour.to_dict(orient="records")[0:15])
 class TestProcessing:
     def test_process_price(self):
         msg = assessment._hour_price()
-        # \nTrong giờ qua, giá BTCUSDT giảm 0.37% từ 42847.99 xuống 42687.36
-        assert msg == ""
+        assert msg == "\nTrong giờ qua, giá BTCUSDT giảm 0.37% từ 42847.99 xuống 42687.36"
         msg = assessment._price()
         assert msg == "\nTrong giờ qua, giá BTCUSDT cao nhất là: 42890.23 lúc 7:8 và thấp nhất là: 42664.0 lúc 7:46"
 
