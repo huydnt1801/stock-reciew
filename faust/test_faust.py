@@ -16,11 +16,11 @@ class TestProcessing:
         msg = assessment._hour_price()
         assert msg == "\nTrong giờ qua, giá BTCUSDT giảm 0.37% từ 42847.99 xuống 42687.36"
         msg = assessment._price()
-        assert msg == "\nTrong giờ qua, giá BTCUSDT cao nhất là: 42890.23 lúc 7:8 và thấp nhất là: 42664.0 lúc 7:46"
+        assert msg == "\nTrong giờ qua, giá BTCUSDT cao nhất là: 42890.23 lúc 14:8 và thấp nhất là: 42664.0 lúc 14:46"
 
     def test_process_volume(self):
         msg = assessment._volume_analysis(high, low)
-        assert msg == "\nTừ 7:53 đến 7:56 BTCUSDT tăng 0.13% với volume trung bình cao nhất 33.97/phút\nTừ 7:44 đến 7:49 BTCUSDT giảm 0.16% với volume trung bình cao nhất 20.78/phút"
+        assert msg == "\nTừ 14:53 đến 14:56 BTCUSDT tăng 0.13% với volume trung bình cao nhất 33.97/phút\nTừ 14:44 đến 14:49 BTCUSDT giảm 0.16% với volume trung bình cao nhất 20.78/phút"
 
     def test_change_number(self):
         assert len(high) == 10
