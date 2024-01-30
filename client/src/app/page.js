@@ -1,17 +1,24 @@
-'use client'
+"use client";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
 export default function Home() {
-  const [data, setData] = useState([])
-  const [data2, setData2] = useState([])
+  const [data, setData] = useState([]);
+  const [data2, setData2] = useState([]);
   useEffect(() => {
-    axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/v1/news`).then(res => {
-      setData(res.data.slice(0,4))
-      setData2(res.data.slice(4,8))
-    })
-  }, [])
+    fetch("/news.json")
+      .then(
+        (
+          res //`${process.env.NEXT_PUBLIC_BE_URL}/api/v1/news`
+        ) => res.json()
+      )
+      .then((res) => {
+        let x = res.reverse()
+        setData(x.slice(0, 4));
+        setData2(x.slice(4, 8));
+      });
+  }, []);
   return (
     <>
       <div className="w-full max-w-5xl flex flex-row mt-4 h-auto">
@@ -52,7 +59,9 @@ export default function Home() {
                   <div className="text-sm mt-3 flex-1">
                     {item.message.slice(0, 200)}...
                   </div>
-                  <div className="mt-2 text-xs text-gray-200">🕝 {interval} giờ trước</div>
+                  <div className="mt-2 text-xs text-gray-200">
+                    🕝 {interval} giờ trước
+                  </div>
                 </div>
               </Link>
             );
@@ -96,7 +105,7 @@ export default function Home() {
                     {item.message.slice(0, 200)}...
                   </div>
                   <div className="mt-2 text-xs text-gray-600">
-                  🕝 {interval} giờ trước
+                    🕝 {interval} giờ trước
                   </div>
                 </div>
               </div>

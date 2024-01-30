@@ -21,7 +21,7 @@ spec:
         - containerPort: 3000
         env:
         - name: NEXT_PUBLIC_BE_URL
-          value: "http://localhost:5000"
+          value: "http://localhost:30005"
 ---
 apiVersion: v1
 kind: Service
@@ -30,7 +30,9 @@ metadata:
 spec:
   selector:
     app: client
+  type: NodePort  
   ports:
     - protocol: TCP
       port: 3000
       targetPort: 3000
+      nodePort: 30003

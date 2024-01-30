@@ -25,9 +25,9 @@ spec:
         - name: KAFKA_BROKERS
           value: '["kafka-service"]'
         - name: BINANCE_LICENSE_TOKEN
-          value: "841275ca-7ea0-4894-9e93-t7da79bd378af"
+          value: "1a6ab4a5-6a38-40d2-b129-t7fc168b5d129"
         - name: BINANCE_API_SECRET
-          value: "21b823bdfba0f3e3b998b55a8d0ba4d6322e0dbe2120374103d08e9fbce7063e"
+          value: "179cca78331ba7f5f5d08a2afe16bfd689b2449e45d124fc847ba028014cece7"
 ---
 apiVersion: v1
 kind: Service

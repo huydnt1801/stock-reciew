@@ -25,7 +25,7 @@ spec:
         - name: KAFKA_BROKERS
           value: '["kafka-service"]'
         - name: OPENAI_KEY
-          value: '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'
+          value: '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'
         - name: SYMBOL_LEN
           value: "8"
 ---
